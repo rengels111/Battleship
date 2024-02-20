@@ -1,30 +1,35 @@
 package battleship;
 
-import java.util.Scanner;
+import java.util.InputMismatchException;
 
 public class Game {
 
-    String shipStart;
-    String shipEnd;
-    int shipLength;
+    Field field = new Field();
+    Player player = new Player();
+    GameLogic logic = new GameLogic();
 
-    private static final Scanner sc = new Scanner(System.in);
+    void start() {
+        field.printField();
+        try {
+            player.inputShipCoordinates();
+            int shipLength = logic.calculateShipLength(
+                    player.getFirstLetter(),
+                    player.getSecondLetter(),
+                    player.getFirstNum(),
+                    player.getSecondNum()
+            );
+            logic.outputShipData(
+                    shipLength,
+                    player.getFirstLetter(),
+                    player.getSecondLetter(),
+                    player.getFirstNum(),
+                    player.getSecondNum());
+        } catch (InputMismatchException e) {
+            System.out.println("Error! Invalid input! Valid input is: \"[A-J][1-10] [A-J][1-10]\"");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error! Ship position not possible!");
+        }
 
-    void inputCoordinates() {
-        System.out.println("Enter the coordinates of the ship:");
-        shipStart = sc.next();
-        shipEnd = sc.next();
-    }
 
-    void checkLength(String start, String end) {
-        int first = Integer.parseInt(String.valueOf(start.charAt(1)));
-        int second = Integer.parseInt(String.valueOf(end.charAt(1)));
-
-        shipLength =  Math.abs(first - second);
-    }
-
-    void outputShip(int shipLength) {
-        System.out.printf("Length: %d\n", shipLength);
-        System.out.println("Parts: ");
     }
 }

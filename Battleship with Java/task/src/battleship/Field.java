@@ -9,7 +9,6 @@ public class Field {
     char letter = 'A';
 
     void printField() {
-
         System.out.println("  1 2 3 4 5 6 7 8 9 10");
         for (int i = 0; i < 10; i++) {
             System.out.print(letter);
@@ -19,7 +18,5 @@ public class Field {
             System.out.println();
             letter++;
         }
-
-
     }
 }
