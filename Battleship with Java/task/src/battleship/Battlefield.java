@@ -19,7 +19,7 @@ public class Battlefield {
         return field;
     }
 
-    public boolean isAround(int i, int j) {
+    private boolean isAround(int i, int j) {
         try {
             if (this.field[i][j - 1].isShip()) {
                 return true;
@@ -66,6 +66,50 @@ public class Battlefield {
             }
         }
     }
+
+    public void checkForHits(String shot) {
+        int x = shot.charAt(0) - 65;
+        int y = Integer.parseInt(shot.substring(1)) - 1;
+
+        if (field[x][y].isShip()) {
+            System.out.println("You hit a ship! Try again:");
+            field[x][y].setWasHit(true);
+        } else {
+            System.out.println("You missed! Try again:");
+            field[x][y].setMissed(true);
+        }
+    }
+
+    public void printFogOfWarField() {
+        StringBuilder toPrint = new StringBuilder();
+        toPrint.append("  1 2 3 4 5 6 7 8 9 10\n");
+        for (int i = 0; i < 10; i++) {
+            toPrint.append((char) (i + 65));
+            toPrint.append(" ");
+            for (int j = 0; j < 10; j++) {
+                if (!this.field[i][j].isMissed() && !this.field[i][j].isWasHit()) {
+                    toPrint.append("~ ");
+                } else if (this.field[i][j].isMissed() || this.field[i][j].isWasHit()) {
+                    toPrint.append(this.field[i][j]);
+                    toPrint.append(" ");
+                }
+            }
+            toPrint.append("\n");
+        }
+        System.out.println(toPrint);
+    }
+
+    public boolean checkWin() {
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (this.field[i][j].isShip()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 
     @Override
     public String toString() {

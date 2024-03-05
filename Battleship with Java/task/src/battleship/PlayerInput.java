@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 public class PlayerInput {
 
+    String rowLetters = "ABCDEFGHIJ";
     private int x1;
     private int x2;
     private int y1;
@@ -38,7 +39,7 @@ public class PlayerInput {
 
             // split input
             if (!input.contains(" ")) {
-                invalidInputMessage();
+                invalidShipInputMessage();
             } else {
                 String[] coordinates = input.split(" ");
                 String coordinateA = coordinates[0];
@@ -47,28 +48,30 @@ public class PlayerInput {
                 // check if valid coordinate length
                 if (coordinateA.length() < 2 || coordinateA.length() > 3 ||
                         coordinateB.length() < 2 || coordinateB.length() > 3) {
-                    invalidInputMessage();
+                    invalidShipInputMessage();
                 } else {
-
                     // extract chars from input
                     char firstLetter = coordinateA.charAt(0);
                     char secondLetter = coordinateB.charAt(0);
 
                     // check if valid symbols
-                    String rowLetters = "ABCDEFGHIJ";
                     if (rowLetters.indexOf(firstLetter) == -1 || rowLetters.indexOf(secondLetter) == -1) {
-                        invalidInputMessage();
+                        invalidShipInputMessage();
                     } else {
                         x1 = firstLetter - 65;
                         x2 = secondLetter - 65;
 
                         // extract numeric values from input
-                        y1 = Integer.parseInt(coordinateA.substring(1)) - 1;
-                        y2 = Integer.parseInt(coordinateB.substring(1)) - 1;
+                        try {
+                            y1 = Integer.parseInt(coordinateA.substring(1)) - 1;
+                            y2 = Integer.parseInt(coordinateB.substring(1)) - 1;
+                        } catch (IllegalArgumentException e) {
+                            invalidShipInputMessage();
+                        }
 
                         // check if valid numbers
                         if (y1 < 0 || y1 > 9 || y2 < 0 || y2 > 9) {
-                            invalidInputMessage();
+                            invalidShipInputMessage();
                         } else {
                             correctInput = true;
                         }
@@ -78,8 +81,28 @@ public class PlayerInput {
         }
     }
 
-    private void invalidInputMessage() {
+    public String shot() {
+        boolean correctInput = false;
+        String target = null;
+        while (!correctInput) {
+            target = sc.nextLine().trim();
+            char letter = target.charAt(0);
+            int number = Integer.parseInt(target.substring(1)) - 1;
+            if (rowLetters.indexOf(letter) == -1 || number < 0 || number > 9) {
+                invalidTargetInputMessage();
+            } else {
+                correctInput = true;
+            }
+        }
+        return target;
+    }
+
+    private void invalidShipInputMessage() {
         System.out.println("Error! Invalid input! Valid input is: \"[A-J][1-10] [A-J][1-10]\". Try again:");
+    }
+
+    private void invalidTargetInputMessage() {
+        System.out.println("Error! Invalid input! Valid input is: \"[A-J][1-10]\". Try again:");
     }
 
 }
