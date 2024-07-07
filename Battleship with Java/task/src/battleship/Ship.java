@@ -1,14 +1,23 @@
 package battleship;
 
 public class Ship {
-
-    private String name;
+    private final String name;
+    private int x1, y1, x2, y2;
     private int length;
+    private boolean horizontal;
 
-    private int x1;
-    private int y1;
-    private int x2;
-    private int y2;
+    public Ship(String name) {
+        this.name = name;
+    }
+
+    public Ship(String name, int x1, int y1, int x2, int y2) {
+        this.name = name;
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+        this.length = calculateShipLength();
+    }
 
     public int getX1() {
         return x1;
@@ -42,16 +51,8 @@ public class Ship {
         this.y2 = y2;
     }
 
-    public Ship(String name) {
-        this.name = name;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public int getLength() {
@@ -62,34 +63,28 @@ public class Ship {
         this.length = length;
     }
 
-    private boolean horizontalShip;
-
-
-    public boolean isHorizontalShip() {
-        return horizontalShip;
+    public boolean isHorizontal() {
+        return horizontal;
     }
 
-    public int calculateShipLength(int x1, int y1, int x2, int y2) {
+    public int calculateShipLength() {
         if (x1 == x2) {
-            horizontalShip = true;
+            horizontal = true;
             return Math.abs(y1 - y2) + 1;
         } else if (y1 == y2) {
-            horizontalShip = false;
+            horizontal = false;
             return Math.abs(x1 - x2) + 1;
         } else {
-            System.out.println("Error! Wrong ship location! Try again:");
-            return 0;
+            throw new IllegalArgumentException("Error! Wrong ship location! Ships must be placed either horizontally or vertically.");
         }
     }
 
-    public boolean checkLength(int shipLengthShall, int shipLengthIs) {
-        boolean validShipLength;
-        if (shipLengthShall == shipLengthIs) {
-            validShipLength = true;
+    public boolean checkLength(int expectedLength) {
+        if (expectedLength == length) {
+            return true;
         } else {
-            validShipLength = false;
-            System.out.println("Error! Wrong length of the Submarine! Try again:");
+            System.out.printf("Error! Wrong length of the %s! Try again:%n", name);
+            return false;
         }
-        return validShipLength;
     }
 }

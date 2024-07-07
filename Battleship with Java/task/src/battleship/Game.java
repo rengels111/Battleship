@@ -1,78 +1,105 @@
 package battleship;
 
 import java.util.InputMismatchException;
+import java.util.Scanner;
 
 public class Game {
-    Battlefield battlefield = new Battlefield();
-    PlayerInput playerInput = new PlayerInput();
+    private final Battlefield player1Field = new Battlefield();
+    private final Battlefield player2Field = new Battlefield();
+    private final PlayerInput playerInput = new PlayerInput();
 
+    public void start() {
+        System.out.println("Player 1, place your ships on the game field");
+        player1Field.printBattlefield();
+        setupBattlefield(player1Field);
+        promptEnterKey();
 
-    void start() {
-        printBattlefield();
-        try {
-            placeAllShips();
-            startGame();
-            theShooting();
-        } catch (InputMismatchException e) {
-            System.out.println("Error! Invalid input! Valid input is: \"[A-J][1-10] [A-J][1-10]\"");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error! Wrong ship location!");
-        }
-    }
+        System.out.println("Player 2, place your ships on the game field");
+        player2Field.printBattlefield();
+        setupBattlefield(player2Field);
+        promptEnterKey();
 
-
-    private void theShooting() {
-        System.out.println("Take a shot!");
-        boolean sankAllShips = false;
-        while (!sankAllShips) {
-            battlefield.checkForHits(playerInput.shot());
-            sankAllShips = battlefield.checkWin();
-            if (!sankAllShips) {
-                printFogOfWar();
-            } else {
-                System.out.println("You sank the last ship. You won. Congratulations!");
-            }
-        }
+        startGame();
     }
 
     private void startGame() {
-        System.out.print("The game starts!\n\n");
-        printFogOfWar();
-    }
-    private void printBattlefield() {
-        System.out.println(battlefield);
+        boolean gameOver = false;
+        boolean player1Turn = true;
+
+        while (!gameOver) {
+            if (player1Turn) {
+                System.out.println("Player 1, it's your turn:");
+                printGameState(player2Field, player1Field);
+                player2Field.checkForHit(playerInput.shot());
+                gameOver = player2Field.checkWin();
+            } else {
+                System.out.println("Player 2, it's your turn:");
+                printGameState(player1Field, player2Field);
+                player1Field.checkForHit(playerInput.shot());
+                gameOver = player1Field.checkWin();
+            }
+
+            if (!gameOver) {
+                promptEnterKey();
+                player1Turn = !player1Turn;
+            }
+        }
+
+        System.out.println("You sank the last ship. You won. Congratulations!");
     }
 
-    private void printFogOfWar() {
-        battlefield.printFogOfWarField();
+    private void setupBattlefield(Battlefield battlefield) {
+        placeShip(battlefield, "Aircraft Carrier", 5);
+        placeShip(battlefield, "Battleship", 4);
+        placeShip(battlefield, "Submarine", 3);
+        placeShip(battlefield, "Cruiser", 3);
+        placeShip(battlefield, "Destroyer", 2);
     }
 
-    private void placeAllShips() {
-        Ship aircraftCarrier = placeShip("Aircraft Carrier", 5);
-        Ship battleship = placeShip("Battleship", 4);
-        Ship submarine = placeShip("Submarine", 3);
-        Ship cruiser = placeShip("Cruiser", 3);
-        Ship destroyer = placeShip("Destroyer", 2);
-    }
-
-    private Ship placeShip(String shipName, int shipLengthShall) {
-        System.out.printf("Enter the coordinates of the %s (%d cells):\n", shipName, shipLengthShall);
-        Ship ship = new Ship(shipName);
-        boolean validShipLength = false;
-        boolean positionOk = false;
-        while (!validShipLength || !positionOk) {
+    private void placeShip(Battlefield battlefield, String shipName, int shipLengthShall) {
+        boolean shipPlaced = false;
+        while (!shipPlaced) {
+            System.out.printf("Enter the coordinates of the %s (%d cells):\n", shipName, shipLengthShall);
             playerInput.inputShipCoordinates();
             int x1 = playerInput.getX1();
             int x2 = playerInput.getX2();
             int y1 = playerInput.getY1();
             int y2 = playerInput.getY2();
-            int shipLengthIs = ship.calculateShipLength(x1, y1, x2, y2);
-            validShipLength = ship.checkLength(shipLengthShall, shipLengthIs);
-            positionOk = battlefield.checkValidPosition(x1, y1, x2, y2, ship.isHorizontalShip());
+
+            try {
+                Ship ship = new Ship(shipName, x1, y1, x2, y2);
+
+                if (!ship.checkLength(shipLengthShall)) {
+                    continue;
+                }
+
+                if (!battlefield.checkValidPosition(x1, y1, x2, y2, ship.isHorizontal())) {
+                    continue;
+                }
+
+                battlefield.updateBattlefield(x1, y1, x2, y2, ship.isHorizontal());
+                battlefield.printBattlefield();
+                shipPlaced = true;
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+            }
         }
-        ship.setLength(shipLengthShall);
-        battlefield.updateBattlefield(playerInput.getX1(), playerInput.getY1(), playerInput.getX2(), playerInput.getY2(), ship.isHorizontalShip());
-        printBattlefield();
-        return ship;
+    }
+
+    private void printGameState(Battlefield opponentField, Battlefield playerField) {
+        System.out.println("Opponent's field:");
+        opponentField.printFogOfWarField();
+        System.out.println("---------------------");
+        System.out.println("Your field:");
+        playerField.printBattlefield();
+    }
+
+    private void promptEnterKey() {
+        System.out.println("Press Enter and pass the move to another player");
+        try {
+            System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
